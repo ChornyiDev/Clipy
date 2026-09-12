@@ -80,7 +80,7 @@ final class MenuManager: NSObject {
 
     // MARK: - Enum Values
     enum StatusType: Int {
-        case none, black, white
+        case none, black, white, paperclip, clipboard, dot
     }
 
     // MARK: - Initialize
@@ -390,6 +390,13 @@ private extension MenuManager {
             statusBarItem.isVisible = true
         case .none:
             statusBarItem.isVisible = false
+        case .paperclip, .clipboard, .dot:
+            let symbol = type == .paperclip ? "paperclip" : type == .clipboard ? "clipboard" : "circle.fill"
+            let image = NSImage(systemSymbolName: symbol, accessibilityDescription: "Clipy")?
+                .withSymbolConfiguration(.init(pointSize: type == .dot ? 7 : 16, weight: .regular))
+            image?.isTemplate = true
+            statusBarItem.button?.image = image
+            statusBarItem.isVisible = true
         }
     }
 }

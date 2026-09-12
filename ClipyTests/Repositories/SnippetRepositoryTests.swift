@@ -11,6 +11,7 @@
 //
 
 import Combine
+import Dependencies
 import DependenciesTestSupport
 import SQLiteData
 import Testing
@@ -23,6 +24,23 @@ import Testing
     }
 )
 struct SnippetRepositoryTests {
+    @Test
+    func openingSnippetManagerPreservesContent() throws {
+        let folder = try #require(repository.insertFolder())
+        let snippet = try #require(repository.insertSnippet(to: folder.id))
+        repository.updateSnippetContent(snippet.id, content: "Existing snippet\nSecond line")
+        let before = repository.fetchFolderDetails()
+        let controller = withDependencies {
+            $0.snippetRepository = repository
+            $0.hotKeyService = HotKeyService()
+        } operation: {
+            CPYSnippetsEditorWindowController(windowNibName: "CPYSnippetsEditorWindowController")
+        }
+        let window = try #require(controller.window)
+        #expect(window.contentView != nil)
+        #expect(repository.fetchFolderDetails() == before)
+    }
+
     let repository: SnippetRepository
 
     init() {

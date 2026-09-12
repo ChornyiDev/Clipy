@@ -10,6 +10,7 @@
 //  Copyright © 2015-2026 Clipy Project.
 //
 
+import Cocoa
 import DependenciesTestSupport
 import Sharing
 import Testing
@@ -17,6 +18,21 @@ import Testing
 
 @Suite(.dependencies)
 struct AppStorageValuesTests {
+    @Test @MainActor
+    func openingPreferencesPreservesSavedSettings() throws {
+        let domain = try #require(Bundle.main.bundleIdentifier)
+        let before = UserDefaults.standard.persistentDomain(forName: domain) ?? [:]
+        let controller = CPYPreferencesWindowController(window: nil)
+        let window = try #require(controller.window)
+        #expect(window.contentViewController != nil)
+        #expect(window.contentView!.frame.width >= 680)
+        let after = UserDefaults.standard.persistentDomain(forName: domain) ?? [:]
+        // Window autosave may add its own key; existing preferences must survive unchanged.
+        #expect(before.allSatisfy { key, value in
+            NSDictionary(dictionary: [key: value]).isEqual(to: [key: after[key] as Any])
+        })
+    }
+
     @Test
     func loadDefaultBooleanSettings() {
         @Shared(.isLaunchAtLogin) var isLaunchAtLogin
