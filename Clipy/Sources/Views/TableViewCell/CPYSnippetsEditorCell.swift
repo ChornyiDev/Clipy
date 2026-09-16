@@ -54,7 +54,7 @@ final class CPYSnippetsEditorCell: NSTextFieldCell {
             imageFrame.origin.y += 5
             imageFrame.size = NSSize(width: 16, height: 13)
 
-            let drawImage = (isHighlighted) ? NSImage(resource: .snippetsIconFolderWhite) : NSImage(resource: .snippetsIconFolderBlue)
+            let drawImage = NSImage(resource: .snippetsIconFolderBlue)
             drawImage.size = NSSize(width: 16, height: 13)
             drawImage.draw(in: imageFrame, from: NSRect.zero, operation: .sourceOver, fraction: 1.0, respectFlipped: true, hints: nil)
 
@@ -69,7 +69,7 @@ final class CPYSnippetsEditorCell: NSTextFieldCell {
             newFrame.size.height -= 2
         }
 
-        textColor = (!isItemEnabled) ? .lightGray : (isHighlighted) ? .white : NSColor(resource: .title)
+        textColor = isItemEnabled ? .labelColor : .secondaryLabelColor
 
         super.draw(withFrame: newFrame, in: controlView)
     }

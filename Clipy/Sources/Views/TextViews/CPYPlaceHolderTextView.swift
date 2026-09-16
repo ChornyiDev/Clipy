@@ -25,9 +25,6 @@ class CPYPlaceHolderTextView: NSTextView {
             needsDisplay = true
         }
     }
-    override var textContainerOrigin: NSPoint {
-        return NSPoint(x: 0, y: 7)
-    }
 
     // MARK: - Draw
     override func draw(_ dirtyRect: NSRect) {
@@ -42,7 +39,8 @@ class CPYPlaceHolderTextView: NSTextView {
         let attributes: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 14),
                                                          .foregroundColor: placeHolderColor,
                                                          .paragraphStyle: paragraphStyle]
-        text.draw(at: NSPoint(x: 5, y: 5), withAttributes: attributes)
+        let origin = textContainerOrigin
+        text.draw(at: NSPoint(x: origin.x + (textContainer?.lineFragmentPadding ?? 0), y: origin.y), withAttributes: attributes)
     }
 
 }
