@@ -107,6 +107,33 @@ final class DatabaseMigrationTests {
     }
 
     @Test
+    func migrateSnippetsFromNewerRealmSchema() throws {
+        let url = temporaryDirectoryURL.appendingPathComponent("newer.realm")
+        try autoreleasepool {
+            let realm = try Realm(configuration: Realm.Configuration(fileURL: url, schemaVersion: 9))
+            let folder = CPYFolder()
+            folder.title = "Existing folder"
+            let snippet = CPYSnippet()
+            snippet.content = "Preserved content"
+            folder.snippets.append(snippet)
+            try realm.write { realm.add(folder) }
+        }
+
+        withDependencies {
+            $0.realmConfiguration = Realm.Configuration(fileURL: url, schemaVersion: 7)
+        } operation: {
+            DatabaseMigration().migrateFromRealmToSQLiteData()
+        }
+
+        try database.read { database in
+            let folders = try SnippetFolder.all.fetchAll(database)
+            let snippets = try Snippet.all.fetchAll(database)
+            #expect(folders.count == 1)
+            #expect(snippets.map(\.content) == ["Preserved content"])
+        }
+    }
+
+    @Test
     func migrateSnippetsPreservesFolderAndSnippetData() throws {
         let realm = try Realm(configuration: realmConfiguration)
 

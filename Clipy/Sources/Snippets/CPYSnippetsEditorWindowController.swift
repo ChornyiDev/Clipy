@@ -82,6 +82,7 @@ final class CPYSnippetsEditorWindowController: NSWindowController {
     override func windowDidLoad() {
         super.windowDidLoad()
         installModernLayout()
+        window?.initialFirstResponder = outlineView
         // Temporarily disable Dark Mode until this window is migrated to SwiftUI.
         self.window?.appearance = NSAppearance(named: .aqua)
         self.window?.isOpaque = false
@@ -99,6 +100,7 @@ final class CPYSnippetsEditorWindowController: NSWindowController {
     override func showWindow(_ sender: Any?) {
         super.showWindow(sender)
         window?.orderFrontRegardless()
+        window?.makeFirstResponder(outlineView)
     }
 }
 

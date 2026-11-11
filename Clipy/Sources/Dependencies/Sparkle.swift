@@ -13,8 +13,6 @@
 import Combine
 import Dependencies
 import DependenciesMacros
-import Sharing
-import Sparkle
 
 @DependencyClient
 struct Sparkle {
@@ -30,33 +28,10 @@ extension DependencyValues {
     }
 
     private enum SparkleKey: DependencyKey {
-        static var liveValue: Sparkle {
-            let updaterController = SPUStandardUpdaterController(
-                startingUpdater: false,
-                updaterDelegate: nil,
-                userDriverDelegate: nil
-            )
-
-            return Sparkle(
-                configure: {
-                    @Shared(.checksForUpdatesAutomatically) var checksForUpdatesAutomatically
-                    @Shared(.updateCheckInterval) var updateCheckInterval
-
-                    if checksForUpdatesAutomatically {
-                        updaterController.startUpdater()
-                    }
-                    updaterController.updater.updateCheckInterval = TimeInterval(updateCheckInterval)
-                    updaterController.updater.clearFeedURLFromUserDefaults()
-                },
-                lastUpdateCheckDate: {
-                    updaterController.updater.publisher(for: \.lastUpdateCheckDate)
-                        .compactMap { $0 }
-                        .eraseToAnyPublisher()
-                },
-                checkForUpdates: { sender in
-                    updaterController.checkForUpdates(sender)
-                }
-            )
-        }
+        static let liveValue = Sparkle(
+            configure: {},
+            lastUpdateCheckDate: { Empty().eraseToAnyPublisher() },
+            checkForUpdates: { _ in }
+        )
     }
 }

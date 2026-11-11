@@ -142,8 +142,22 @@ private extension DatabaseMigration {
 
 private extension DatabaseMigration {
     func realm() -> Realm? {
+        func openRealm() throws -> Realm {
+            var configuration = realmConfiguration
+            if let url = configuration.fileURL,
+               let version = try? schemaVersionAtURL(url, encryptionKey: configuration.encryptionKey) {
+                // Existing installations may have a newer schema than the legacy migration baseline.
+                // Read those files without trying to remove fields unknown to this importer.
+                if version >= configuration.schemaVersion {
+                    configuration.readOnly = true
+                }
+                configuration.schemaVersion = max(configuration.schemaVersion, version)
+            }
+            return try Realm(configuration: configuration)
+        }
+
         do {
-            return try Realm(configuration: realmConfiguration)
+            return try openRealm()
         } catch {
             guard let url = realmConfiguration.fileURL else { return nil }
 
@@ -153,7 +167,7 @@ private extension DatabaseMigration {
             try? FileManager.default.removeItem(at: lockURL)
             try? FileManager.default.removeItem(at: managementURL)
 
-            return try? Realm(configuration: realmConfiguration)
+            return try? openRealm()
         }
     }
 }
